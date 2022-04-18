@@ -22,11 +22,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
-        sceneView.scene = scene
+        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -34,6 +30,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        
+        configuration.planeDetection = .horizontal
 
         // Run the view's session
         sceneView.session.run(configuration)
@@ -46,29 +44,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
 
-    // MARK: - ARSCNViewDelegate
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
+// MARK: - Horizontal Plane Creation (ARSCNViewDelegate Methods)
+    
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
-    }
-*/
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
+        let portalNode = SCNNode() //Parent Node to hold Horizontal Plane
         
+        //Detecting Plane
+        guard let planeAnchor = anchor as? ARPlaneAnchor
+        else {
+            fatalError("Unable to Detect Horizontal Plane")
+        }
+        
+        //Creating Horizontal Plane
+        let planeHeight = CGFloat(planeAnchor.extent.z)
+        let planeWidth = CGFloat(planeAnchor.extent.x)
+        let horizontalPlane = SCNPlane(width: planeWidth, height: planeHeight)
+        horizontalPlane.firstMaterial?.diffuse.contents = UIColor.blue.withAlphaComponent(0.8)
+        
+        //Creating Plane Node
+        let horizontalPlaneNode = SCNNode(geometry: horizontalPlane)
+        
+        //Transforming Plane from Vertical to Horizontal
+        horizontalPlaneNode.transform = SCNMatrix4MakeRotation(-(Float.pi)/2, 1, 0, 0)
+        
+        //Adding Plane Node to Parent Node
+        portalNode.addChildNode(horizontalPlaneNode)
+        
+        return portalNode
     }
     
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
-    }
-    
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
-    }
+
 }
