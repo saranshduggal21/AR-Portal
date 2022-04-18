@@ -74,5 +74,50 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return portalNode
     }
     
+    
+//MARK: - Placing Objects when User Taps Screen
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //Identifying if User Touch was Detected
+        guard let userTouch = touches.first
+        else {
+            fatalError("No Touch Detected by the User.")
+        }
+        
+        //Getting the Location of Where the User Tapped
+        let userTouchLocation = userTouch.location(in: sceneView)
+        
+        //Converting 2D Touch Location Coordinates to 3D Augemented Reality Ray
+        guard let locationRayQuery = sceneView.raycastQuery(from: userTouchLocation, allowing: .existingPlaneInfinite, alignment: .any)
+        else {
+            fatalError("Unable to convert 2D Touch Coordinates to 3D Ray.")
+        }
+        
+        let locationResults = sceneView.session.raycast(locationRayQuery)
+        
+    
+        //Placing Object at Location of Touch
+        if let safeResults = locationResults.first?.worldTransform {
+            //worldTransform -> Converts AR coordinate to a REAL WORLD POSITION.
+            
+            let object = SCNBox(width: 0.08, height: 0.08, length: 0.08, chamferRadius: 0)
+            
+            object.firstMaterial?.diffuse.contents = UIColor.red
+            
+            let objectNode = SCNNode(geometry: object)
+            
+            //Getting 3D coordinates from 3D Ray
+            let positionX = safeResults.columns.3.x
+            let positionY = safeResults.columns.3.y
+            let positionZ = safeResults.columns.3.z
+            objectNode.position = SCNVector3(positionX, positionY + 0.04, positionZ)
+            
+            sceneView.scene.rootNode.addChildNode(objectNode)
+            
+            sceneView.automaticallyUpdatesLighting = true
+        }
+        
+    }
+    
 
 }
