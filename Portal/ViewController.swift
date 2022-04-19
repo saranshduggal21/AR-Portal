@@ -84,11 +84,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             fatalError("No Touch Detected by the User.")
         }
         
-        //Getting the Location of Where the User Tapped
+        //Getting the Location of Where the User Tapped on the 2D Screen
         let userTouchLocation = userTouch.location(in: sceneView)
         
-        //Converting 2D Touch Location Coordinates to 3D Augemented Reality Ray
+        //Converting 2D Touch Location Coordinates to 3D Augemented Reality RayCast
         guard let locationRayQuery = sceneView.raycastQuery(from: userTouchLocation, allowing: .existingPlaneInfinite, alignment: .any)
+            //The 3D AR RayCast will only be considered/ALLOWED when its on the EXISTING Plane that was created.
         else {
             fatalError("Unable to convert 2D Touch Coordinates to 3D Ray.")
         }
