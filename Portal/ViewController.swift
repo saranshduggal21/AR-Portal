@@ -75,7 +75,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-//MARK: - Placing Objects when User Taps Screen
+//MARK: - Placing Portal when User Taps Screen
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         //Identifying if User Touch was Detected
@@ -101,21 +101,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if let safeResults = locationResults.first?.worldTransform {
             //worldTransform -> Converts AR coordinate to a REAL WORLD POSITION.
             
-            let object = SCNBox(width: 0.08, height: 0.08, length: 0.08, chamferRadius: 0)
+            //Creating a new Portal Scene
+            let portalScene = SCNScene(named: "art.scnassets/Portal-Interior.scn")!
             
-            object.firstMaterial?.diffuse.contents = UIColor.red
+            //Creating Portal Node
+            let portalNode = portalScene.rootNode.childNode(withName: "AR-Portal", recursively: true)
             
-            let objectNode = SCNNode(geometry: object)
+            if let safeNode = portalNode {
+                //Getting 3D coordinates from 3D Ray
+                let positionX = safeResults.columns.3.x
+                let positionY = safeResults.columns.3.y - 0.5
+                let positionZ = safeResults.columns.3.z
+                safeNode.position = SCNVector3(positionX, positionY, positionZ)
+                
+                sceneView.scene.rootNode.addChildNode(safeNode)
+                
+                sceneView.automaticallyUpdatesLighting = true
+            }
             
-            //Getting 3D coordinates from 3D Ray
-            let positionX = safeResults.columns.3.x
-            let positionY = safeResults.columns.3.y
-            let positionZ = safeResults.columns.3.z
-            objectNode.position = SCNVector3(positionX, positionY + 0.04, positionZ)
-            
-            sceneView.scene.rootNode.addChildNode(objectNode)
-            
-            sceneView.automaticallyUpdatesLighting = true
         }
         
     }
