@@ -71,6 +71,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         //Adding Plane Node to Parent Node
         portalNode.addChildNode(horizontalPlaneNode)
         
+        //Disabling detection of more than 1 plane
+        let configuration = ARWorldTrackingConfiguration();
+        configuration.planeDetection = [] //empty array (as opposed to .horizontal .vertical)
+        sceneView.session.run(configuration)
+        
         return portalNode
     }
     
@@ -110,7 +115,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             if let safeNode = portalNode {
                 //Getting 3D coordinates from 3D Ray
                 let positionX = safeResults.columns.3.x
-                let positionY = safeResults.columns.3.y - 0.5
+                let positionY = safeResults.columns.3.y
                 let positionZ = safeResults.columns.3.z
                 safeNode.position = SCNVector3(positionX, positionY, positionZ)
                 
@@ -122,6 +127,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
     }
-    
+
 
 }
